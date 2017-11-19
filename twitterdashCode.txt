@@ -1,0 +1,7 @@
+Note: Python code related to Twitter Dash APP , this code is to be added after a Pyuc5 ui to python conversition.
+
+Path:C:\Users\Jairo\projects\twitterDash
+
+...Line 23
+#Added to hide the widget for later call
+self.widget_ReadCredentials.hide()
