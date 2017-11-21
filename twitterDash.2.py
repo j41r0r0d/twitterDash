@@ -1,203 +1,12 @@
 # -*- coding: utf-8 -*-
-# Created by : Jairo J. Rodriguez
-# email Address : rodriguezjfz@gmail.com
-# Description : Twitter Dash Board Implementation 
-# Last MOdificatio : Nov 19, 2017
 
-import xml.dom.minidom
-import urllib
-import datetime, codecs, tweepy, xml.etree.cElementTree as et
-from PyQt5.QtGui import QPixmap, QIcon
+# Form implementation generated from reading ui file 'twitterdash.ui'
+#
+# Created by: PyQt5 UI code generator 5.6
+#
+# WARNING! All changes made in this file will be lost!
+
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
-
-
-class TwErrorLog(object):
-    def CreateErrLog(self,fileName):
-        LogFileName=fileName
-        logfile=codecs.open(LogFileName,'w',encoding='utf8')
-        logfile.write("Twitter Dash Board Started")
-        logfile.close()
-        
-    def WriteInLog(self,fileName,message):
-        logfile=codecs.open(fileName,'a', encoding='utf8')
-        logfile.write("\n\r" + str(datetime.datetime.now())+"   "+ message + "\n\r")
-        logfile.close()
-    
-class TwitterActions:
-               
-#    def AuthTwCredentials(self,twd_consumer_key,twd_consumer_secret,
-#                        twd_access_key,twd_access_secret,twd_FollowerCount,
-#                          twd_ProfilePic,twd_userInfo):
-    def AuthTwCredentials(self,Obj):
-#       
-        Obj.widget_UserInfo.show()
-               
-                
-        #twd_ck=twd_consumer_key.toPlainText()
-        twd_ck = Obj.pTE_ConKey.toPlainText()  
-        #twd_cs=twd_consumer_secret.toPlainText()
-        twd_cs = Obj.pTE_ConSec.toPlainText()
-        #twd_ak=twd_access_key.toPlainText()
-        twd_ak = Obj.pTE_AccKey.toPlainText()
-        #twd_as=twd_access_secret.toPlainText()
-        twd_as = Obj.pTE_AccSec.toPlainText()
-        
-        print(twd_ck)
-        print(twd_cs)
-        print(twd_ak)
-        print(twd_as)
-        
-        auth = tweepy.OAuthHandler(twd_ck,
-                                   twd_cs)
-        
-        auth.set_access_token(twd_ak,twd_as)
-        
-        try:
-            TwErrorLog.WriteInLog(self,'twitterDash.log', 
-                                 "Authenticating user with consumer key : "
-                                 +twd_ck)
-            twapi = tweepy.API(auth)
-            myUser=twapi.me()
-            
-            
-   
-            
-            Obj.pTE_UsrInf_FollowersCount.show()
-            
-            Obj.Lbl_UserInfo_UserName.setText("User Name")
-            Obj.Lbl_UserInfo_Name.setText("Name")
-            Obj.Lbl_UserInfo_GeoEna.setText("Geo Enabled")
-            Obj.Lbl_UserInfo_Location.setText("Location")
-            Obj.Lbl_UserInfo_CreatedAt.setText("Created at")
-            Obj.Lbl_UserInfo_StatusCount.setText("Status Count")
-            Obj.Lbl_UserInfo_Description.setText("Description")
-            
-            Obj.pTE_UsrInf_FollowersCount.setPlainText(
-                    str(myUser.followers_count))
-            
-            
-            Obj.pTE_UsrInf_FriendsCount.setPlainText(
-                    str(myUser.friends_count))
-            Obj.pTE_UsrInf_UserName.setPlainText(myUser.screen_name)
-            Obj.pTE_UsrInf_Name.setPlainText(myUser.name)
-            Obj.pTE_UsrInf_GeoEnabled.setPlainText(str(myUser.geo_enabled))
-            Obj.pTE_UsrInf_Location.setPlainText(myUser.location)
-            Obj.pTE_UsrInf_StatusCount.setPlainText(
-                    str(myUser.statuses_count))
-            Obj.pTE_UsrInf_Description.setPlainText(myUser.description)
-            Obj.pTE_UsrInf_CreatedAt.setPlainText(
-                    str(myUser.created_at))
-            
-            Obj.pTE_UsrInf_FollowersCount.setPlainText(
-                    str(myUser.followers_count))
-            
-            #twd_FollowerCount.setPlainText(str(myUser.followers_count))
-            #twd_FollowerCount.display(myUser.followers_count)
-            
-            url=myUser.profile_image_url
-            print(url)
-            data = urllib.request.urlopen(url).read()
-            #twd_ProfilePic.pixmap=QPixmap()
-            Obj.label.pixmap=QPixmap()            
-            image = QtGui.QImage()         
-            image.loadFromData(data)
-            #scaled_image = image.scaled( twd_ProfilePic.size(), QtCore.Qt.KeepAspectRatio)
-            scaled_image = image.scaled( Obj.label.size(), QtCore.Qt.KeepAspectRatio)
-            #twd_ProfilePic.setPixmap(QtGui.QPixmap(scaled_image))
-            Obj.label.setPixmap(QtGui.QPixmap(scaled_image))
-                     
-            print(myUser.followers_count)
-
-        except Exception as err:
-            errMsg = str(err)
-            TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
-            print (errMsg)
-                                  
-            pass
-       
-    def SaveTwCredentials(self,twd_username,twd_consumer_key,twd_consumer_secret,
-                          twd_access_key,twd_access_secret):
-        twd_ck=twd_consumer_key.toPlainText()
-        twd_cs=twd_consumer_secret.toPlainText()
-        twd_ak=twd_access_key.toPlainText()
-        twd_as=twd_access_secret.toPlainText()
-        twd_un=twd_username.toPlainText()
-
-   
-        root = et.Element("root")
-        doc = et.SubElement(root,"doc")
-        
-        
-        user = et.SubElement(doc,"user",name=twd_un)
-        et.SubElement(user,"credential",name="consumer key", value=twd_ck)
-        et.SubElement(user,"credential",name="consumer secret", value=twd_cs)
-        et.SubElement(user,"credential",name="access key", value=twd_ak)
-        et.SubElement(user,"credential",name="access secret", value=twd_as)
-        
-        tree = et.ElementTree(root)
-        
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getSaveFileName(caption="Save Credentials file",
-                                                  options=options, filter="*.xml")
-        tree.write(fileName)
-        
-    def LoadTwCredentials(self,xmlFile,twd_username,twd_consumer_key,
-                          twd_consumer_secret,
-                          twd_access_key,twd_access_secret):
-        
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(caption="Open Credential file",
-                                                  options=options, filter="*.xml")
-        xmlFile=fileName
-                
-        try: 
-            doc=xml.dom.minidom.parse(xmlFile)           
-            for node in doc.getElementsByTagName("user"):
-                user=node.getAttribute("name")
-                twd_username.setPlainText(str(user))
-                for i in node.childNodes:
-                    credential=i.getAttribute("name")
-                
-                    key = i.getAttribute("value")
-                    if "consumer key" in credential :
-                        twd_consumer_key.setPlainText(key)
-                    if "consumer secret" in credential :
-                        twd_consumer_secret.setPlainText(key)
-                    if "access key" in credential :
-                        twd_access_key.setPlainText(key)
-                    if "access secret" in credential :
-                        twd_access_secret.setPlainText(key)
-        except Exception as err:
-            errMsg = str(err)
-            TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
-            print (errMsg)  
-            pass               
-                                                    
-class XmlFileMngr():
-    
-    def openFileNameDialog(self):    
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","All Files (*);;XML Files (*.xml)", options=options)
-        if fileName:
-            print(fileName)
- 
-    def openFileNamesDialog(self):    
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        files, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;XML Files (*.xml)", options=options)
-        if files:
-            print(files)
- 
-    def saveFileDialog(self):    
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;XML Files (*.xml)", options=options)
-        if fileName:
-            print(fileName)
 
 class Ui_Mw_TwitteDash(object):
     def setupUi(self, Mw_TwitteDash):
@@ -205,16 +14,10 @@ class Ui_Mw_TwitteDash(object):
         Mw_TwitteDash.setEnabled(True)
         Mw_TwitteDash.resize(1260, 699)
         self.centralwidget = QtWidgets.QWidget(Mw_TwitteDash)
-        
         self.centralwidget.setObjectName("centralwidget")
         self.widget_ReadCredentials = QtWidgets.QWidget(self.centralwidget)
         self.widget_ReadCredentials.setGeometry(QtCore.QRect(20, 50, 821, 311))
         self.widget_ReadCredentials.setObjectName("widget_ReadCredentials")
-       
-        # Hide Read Credentials Widget untill called#####################
-        self.widget_ReadCredentials.hide()
-        #################################################################
-        
         self.Label_ConKey = QtWidgets.QLabel(self.widget_ReadCredentials)
         self.Label_ConKey.setGeometry(QtCore.QRect(52, 79, 121, 31))
         font = QtGui.QFont()
@@ -266,19 +69,9 @@ class Ui_Mw_TwitteDash(object):
         self.pB_LdCred = QtWidgets.QPushButton(self.widget_ReadCredentials)
         self.pB_LdCred.setGeometry(QtCore.QRect(190, 260, 111, 28))
         self.pB_LdCred.setObjectName("pB_LdCred")
-        ########## Load Credentials Button Event <JJRU>#####################
-        self.pB_LdCred.clicked.connect(lambda: twactions.LoadTwCredentials(
-             "AuthCred.xml",self.pTE_UserName,self.pTE_ConKey, self.pTE_ConSec,
-             self.pTE_AccKey, self.pTE_AccSec))
-        ###################################################################
         self.pB_AutCred = QtWidgets.QPushButton(self.widget_ReadCredentials)
         self.pB_AutCred.setGeometry(QtCore.QRect(640, 260, 111, 28))
         self.pB_AutCred.setObjectName("pB_AutCred")
-        
-        ########## Button Event <JJRU>#####################################
-        self.pB_AutCred.clicked.connect(lambda: twactions.AuthTwCredentials(ui))     
-        ###################################################################
-        
         self.pB_SvCred = QtWidgets.QPushButton(self.widget_ReadCredentials)
         self.pB_SvCred.setGeometry(QtCore.QRect(310, 260, 111, 28))
         self.pB_SvCred.setObjectName("pB_SvCred")
@@ -297,21 +90,14 @@ class Ui_Mw_TwitteDash(object):
         font.setPointSize(10)
         self.pTE_UserName.setFont(font)
         self.pTE_UserName.setObjectName("pTE_UserName")
-        
-        ######################################################################
-        # User Info WIdget 
-        ######################################################################
         self.widget_UserInfo = QtWidgets.QWidget(self.centralwidget)
-        self.widget_UserInfo.hide()
-        #self.widget_UserInfo.setEnabled(False)
+        self.widget_UserInfo.setEnabled(False)
         self.widget_UserInfo.setGeometry(QtCore.QRect(850, 30, 371, 531))
         self.widget_UserInfo.setObjectName("widget_UserInfo")
         self.label = QtWidgets.QLabel(self.widget_UserInfo)
         self.label.setGeometry(QtCore.QRect(20, 20, 91, 101))
         self.label.setFrameShape(QtWidgets.QFrame.Box)
         self.label.setText("")
-        
-       
         self.label.setObjectName("label")
         self.Lbl_UserInfo_UserName = QtWidgets.QLabel(self.widget_UserInfo)
         self.Lbl_UserInfo_UserName.setGeometry(QtCore.QRect(20, 130, 91, 31))
@@ -394,7 +180,6 @@ class Ui_Mw_TwitteDash(object):
         self.pTE_UsrInf_FriendsCount = QtWidgets.QPlainTextEdit(self.widget_UserInfo)
         self.pTE_UsrInf_FriendsCount.setGeometry(QtCore.QRect(210, 70, 91, 31))
         self.pTE_UsrInf_FriendsCount.setObjectName("pTE_UsrInf_FriendsCount")
-        #######################################################################
         Mw_TwitteDash.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(Mw_TwitteDash)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1260, 26))
@@ -411,11 +196,7 @@ class Ui_Mw_TwitteDash(object):
         Mw_TwitteDash.setStatusBar(self.statusbar)
         self.actionRead_Authentication_File = QtWidgets.QAction(Mw_TwitteDash)
         self.actionRead_Authentication_File.setObjectName("actionRead_Authentication_File")
-        
-        #Show Read Credentials Widgets After Click Option ###################               
-        self.actionRead_Authentication_File.triggered.connect(lambda: self.widget_ReadCredentials.show()) 
-        #####################################################################
-        self.actionTwitter_Bot_Settings = QtWidgets.QAction(Mw_TwitteDash)     
+        self.actionTwitter_Bot_Settings = QtWidgets.QAction(Mw_TwitteDash)
         self.actionTwitter_Bot_Settings.setObjectName("actionTwitter_Bot_Settings")
         self.actionTwitter_Auto_Follow_Request = QtWidgets.QAction(Mw_TwitteDash)
         self.actionTwitter_Auto_Follow_Request.setObjectName("actionTwitter_Auto_Follow_Request")
@@ -476,6 +257,15 @@ class Ui_Mw_TwitteDash(object):
         self.pB_SvCred.setText(_translate("Mw_TwitteDash", "Save Credentials"))
         self.pB_DeCred.setText(_translate("Mw_TwitteDash", "Delete Credentials"))
         self.Label_UserName.setText(_translate("Mw_TwitteDash", "User Name"))
+        self.Lbl_UserInfo_UserName.setText(_translate("Mw_TwitteDash", "User Name"))
+        self.Lbl_UserInfo_Name.setText(_translate("Mw_TwitteDash", "Name"))
+        self.Lbl_UserInfo_GeoEna.setText(_translate("Mw_TwitteDash", "Geo Enabled"))
+        self.Lbl_UserInfo_Location.setText(_translate("Mw_TwitteDash", "Location"))
+        self.Lbl_UserInfo_CreatedAt.setText(_translate("Mw_TwitteDash", "Created at"))
+        self.Lbl_UserInfo_StatusCount.setText(_translate("Mw_TwitteDash", "Status Count"))
+        self.Lbl_UserInfo_Description.setText(_translate("Mw_TwitteDash", "Description"))
+        self.Lbl_UserInfo_FollowersCount.setText(_translate("Mw_TwitteDash", "Followers"))
+        self.Lbl_UserInfo_FollowersCount_2.setText(_translate("Mw_TwitteDash", "Following"))
         self.menuTwitter_Dash.setTitle(_translate("Mw_TwitteDash", "Twitter Dash"))
         self.menuFriends.setTitle(_translate("Mw_TwitteDash", "Friends"))
         self.menuHelp.setTitle(_translate("Mw_TwitteDash", "Help"))
@@ -498,8 +288,6 @@ class Ui_Mw_TwitteDash(object):
 
 if __name__ == "__main__":
     import sys
-    
-    twactions = TwitterActions()
     app = QtWidgets.QApplication(sys.argv)
     Mw_TwitteDash = QtWidgets.QMainWindow()
     ui = Ui_Mw_TwitteDash()
