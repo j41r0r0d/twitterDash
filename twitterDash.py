@@ -5,11 +5,11 @@
 # Last MOdificatio : Nov 21, 2017
 
 import xml.dom.minidom
-import urllib, os
+import urllib, os, tinyurl
 import datetime,time, codecs, tweepy, xml.etree.cElementTree as et
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QApplication
 import twitterbot, twCountryId as twCId
 
 
@@ -27,13 +27,14 @@ class TwErrorLog(object):
         logfile.close()
     
 class TwitterActions:
-
+    
     def AuthTwCredentials(self,Obj):
-#       
-        global twapi
+       
+        global twapi, myUser
         
+        Obj.actionTwitter_Bot_Settings.setEnabled(True)           
         Obj.widget_UserInfo.show()
-                                      
+                                             
         twd_ck = Obj.pTE_ConKey.toPlainText()         
         twd_cs = Obj.pTE_ConSec.toPlainText()        
         twd_ak = Obj.pTE_AccKey.toPlainText()       
@@ -103,7 +104,9 @@ class TwitterActions:
         except Exception as err:
             errMsg = str(err)
             TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
-            print (errMsg)
+            self.msgBox(errMsg,"Error Message","Information")
+            Obj.actionTwitter_Bot_Settings.setEnabled(False) 
+            Obj.widget_UserInfo.hide()
             pass
        
     def SaveTwCredentials(self,Obj):
@@ -136,13 +139,19 @@ class TwitterActions:
         
     
     def msgBox(self,messageText,msgWindowTitle,msgType):
+        global msg
         msg = QMessageBox()
         if msgType == "warning":
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         elif msgType == "information":            
             msg.setIcon(QMessageBox.Information)
-            msg.setStandardButtons(QMessageBox.Ok) 
+            msg.setStandardButtons(QMessageBox.Ok)
+        elif msgType == "timed":
+            msg.setIcon(QMessageBox.Information)
+            msg.setStandardButtons(QMessageBox.NoButton)
+            self.timer = QtCore.QTimer()
+            self.timer.singleShot(5000,self.msgCloseSlot)
                                
         msg.setWindowTitle(msgWindowTitle)
         msg.setText(messageText)
@@ -152,6 +161,9 @@ class TwitterActions:
     
     def msgbtn(self,i):
         return i.text()
+    
+    def msgCloseSlot(self):
+        msg.destroy()
     
     
     def DeleteTwCredentials(self,Obj):
@@ -201,31 +213,12 @@ class TwitterActions:
         except Exception as err:
             errMsg = str(err)
             TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
-            print (errMsg)  
+            self.msgBox(errMsg,"Error Message","Information")  
             pass  
-    
-    def trendings(self,Obj,country):
-        IDtrendLocal=country
-        IDtrendGlobal=0
-         
-        TTGlobal = twapi.trends_place(IDtrendGlobal)
-        TTLocal =  twapi.trends_place(IDtrendLocal)
         
-        dataLocal=TTLocal[0]
-        dataGlobal = TTGlobal[0]
-        trendsLocal=dataLocal['trends']
-        trendsGlobal=dataGlobal['trends']
+    def itemSelectionHandler(self):
+        global TTLocal, TTGlobal
         
-        namesLoc=[trendLocal['name'] for trendLocal in trendsLocal]
-        namesGlo=[trendGlobal['name'] for trendGlobal in trendsGlobal]
-        
-        for i in range (len(namesGlo)):
-            Obj.cBox_BotTrendGlobal.addItem(namesGlo[i])
-            
-        for i in range (len(namesLoc)):
-            Obj.cBox_BotTrendLocal.addItem(namesLoc[i])
-    
-    def itemSelectionHandler(self,text):
         CidAux=(str(ui.cBox_BotTTLocal.currentText()))
         Cid=CidAux.split("-")
         
@@ -250,6 +243,9 @@ class TwitterActions:
             ui.lW_GlobalTrending.addItem(TTGlobal[indx])
     
     def LoadBotFile(self):
+        
+        global Botfile,f
+               
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         BotfileName, _ = QFileDialog.getOpenFileName(
@@ -258,9 +254,21 @@ class TwitterActions:
         ui.pTE_BotFileName.setPlainText(BotfileName)        
         
         Botfile=codecs.open(BotfileName,'r',encoding='utf8')
-        Bottext=Botfile.read()
-        ui.pTE_BotFileEditt.setPlainText(Bottext)
+        f=Botfile.readlines()
+        Botfile=codecs.open(BotfileName,'r',encoding='utf8')
+        BottextFile=Botfile.read()
+        ui.pTE_BotFileEditt.setPlainText(BottextFile)
+    
+    def MediaLocation(self):
         
+        global MediaFile
+        
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        BotMediaLocation = QFileDialog.getExistingDirectory()
+        ui.pTE_BotMediaLocation.setPlainText(BotMediaLocation)        
+
+    
     def SaveBotFile(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -279,62 +287,203 @@ class TwitterActions:
                 filter="Bot Setting File(*.bsf);;All (*.*)")
         os.system('start '+ BotfileName)
 
-    def destroyStatuses(self):
+    def destroyStatuses(self,Obj):
         statusCount=0
-        
-        #msg = QMessageBox()
-        #msg.setIcon(QMessageBox.Warning)
-        #msg.setWindowTitle("Delete Previos Statuses")
-        #msg.setText("Twitter Statuses will be deleted !!!")
-        #msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-        #msg.buttonClicked.connect(self.msgbtn)
-        #retval = msg.exec_()
-        retval=self.msgBox(               
-                "Twitter Statuses will be deleted !!!",\
-                "Delete Previos Statuses",\
-                "warning")
-        
         sBar=ui.pBarDestroyingStatuses
         sBar.setValue(0)
-        ui.widget_StatusBar.show()
+        ui.widget_StatusBar.show()        
+        retval=self.msgBox(               
+                "Twitter Statuses will be deleted !!!",\
+                "Delete Previous Statuses",\
+                "warning")
+
+
         if retval == QMessageBox.Ok :
-                myUser=twapi.me()
+                #myUser=twapi.me()
                 statusescount=myUser.statuses_count
                 sBar.setMaximum(statusescount-31)
 
                 if ((statusescount-31)==0):
                             self.msgBox(               
                             "No Statuses to be destroyed",\
-                            "Delete Previos Statuses",\
+                            "Delete Previous Statuses",\
                             "information")
 
                             pass
                         
                 for status in tweepy.Cursor(twapi.user_timeline).items():
                     try:
-                        
-                        
                         statusCount=statusCount+1
                         time.sleep(5)
                         sBar.setValue(statusCount)
                         sBar.show()
                         twapi.destroy_status(status.id)
                         TwErrorLog.WriteInLog(self,'twitterDash.log',\
-                                              "Status ID "+str(status.id) + " distroyed")
-                    except Exception as err:
-                        TwErrorLog.WriteInLog(self,'twitterDash.log', str(err)) 
+                                              "Status ID "+str(status.id) + " destroyed")
+                    except Exception as errMsg:
+                        TwErrorLog.WriteInLog(self,'twitterDash.log', str(errMsg))
+                        self.msgBox(errMsg,"Error Message","Information")
                         pass                   
                 TwErrorLog.WriteInLog(self,'twitterDash.log',\
-                              str(statusescount-31) +" Previus statuses distroyed")
+                              str(statusescount-31) +" Previous statuses destroyed")
                 ui.widget_StatusBar.hide()
         else :
             pass
              
+    
+    def executeBot(self,Obj):
+        Sline=""
+        twline=""
+        TwErrorLog.WriteInLog(self,'twitterDash.log', "Twitter Dash Bot initiated")
+        num_lines = ui.pTE_BotFileEditt.document().blockCount()
+        namesLoc=TTLocal
+        namesGlo=TTGlobal
+        print(num_lines)
+        try:
+            twtime=int(ui.pTE_BotPubFreq.toPlainText())
+        except:
+            pass
+        
+        #f=Botfile.readlines()
+        mediaFile=ui.pTE_BotMediaLocation.toPlainText()
+
+        for line in f:
+           try:
+               self.itemSelectionHandler()
+               if line.find("[media]") >= 0:
+                    MSline=line.split(" ")
+                    mediaFile="images/" + str(MSline[1])
+                    text=MSline[2]
+                    twapi.update_with_media(mediaFile,text+namesLoc[1]+" "+ namesLoc[2])
+                    TwErrorLog.WriteInLog(self,'twitterDash.log',"Media file "+ mediaFile + " published")                   
+                    time.sleep(twtime)
+
+               elif line.find("[ttl]") >=0:
+                   twitTrendingsLocal ="Trending Topics Venezuela (" + str(datetime.datetime.now()
+                		 ) + " GMT): " +\
+                        "\n[1]" + namesLoc[0] +\
+                        "\n[2]"+ namesLoc[1]+\
+                        "\n[3]"+ namesLoc[2]+\
+                        "\n[4]"+ namesLoc[3]+\
+                        "\n[5]"+ namesLoc[4]+\
+                        "\n[6]"+ namesLoc[5]+\
+                        "\n[7]"+ namesLoc[6]+\
+                        "\n[8]"+ namesLoc[7]+\
+                        "\n[9]"+ namesLoc[8]+\
+                        "\n[10]"+ namesLoc[9]
+                   #print(twitTrendingsLocal)
+                   try:
+                       twapi.update_status(twitTrendingsLocal)
+                       TwErrorLog.WriteInLog(self,'twitterDash.log',twitTrendingsLocal)
+                   except Exception as err:
+                       errMsg = str(err)
+                       TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
+                       self.msgBox(errMsg,"Error Message","timed")  
+                       pass  
+
+                   
+               elif line.find("[ttg]") >=0:
+                   twitTrendingsGlobal ="World Trending Topics (" + str(datetime.datetime.now()
+                		 ) + " GMT): " +\
+                        "\n[1]" + namesGlo[0] +\
+                        "\n[2]"+ namesGlo[1]+\
+                        "\n[3]"+ namesGlo[2]+\
+                        "\n[4]"+ namesGlo[3]+\
+                        "\n[5]"+ namesGlo[4]+\
+                        "\n[6]"+ namesGlo[5]+\
+                        "\n[7]"+ namesGlo[6]+\
+                        "\n[8]"+ namesGlo[7]+\
+                        "\n[9]"+ namesGlo[8]+\
+                        "\n[10]"+ namesGlo[9]
+                   #print(twitTrendingsGlobal)
+                   try:
+                       twapi.update_status(twitTrendingsLocal)
+                       TwErrorLog.WriteInLog(self,'twitterDash.log',twitTrendingsGlobal)
+                   except Exception as err:
+                       errMsg = str(err)
+                       TwErrorLog.WriteInLog(self,'twitterDash.log', errMsg) 
+                       self.msgBox(errMsg,"Error Message","timed")  
+                       pass 
+
+               else :
+                    Sline=line.split(" ")
+                    Sline = [w.replace ('^ttl1',namesLoc[0]) for w in Sline]
+                    Sline = [w.replace ('^ttl2',namesLoc[1]) for w in Sline]
+                    Sline = [w.replace ('^ttl3',namesLoc[2]) for w in Sline]
+                    Sline = [w.replace ('^ttl4',namesLoc[3]) for w in Sline]
+                    Sline = [w.replace ('^ttl5',namesLoc[4]) for w in Sline]
+                    Sline = [w.replace ('^ttl6',namesLoc[5]) for w in Sline]
+                    Sline = [w.replace ('^ttg1',namesGlo[0]) for w in Sline]
+                    Sline = [w.replace ('^ttg2',namesGlo[1]) for w in Sline]
+                    Sline = [w.replace ('^ttg3',namesGlo[2]) for w in Sline]
+                    Sline = [w.replace ('^ttg4',namesGlo[3]) for w in Sline]
+                    Sline = [w.replace ('^ttg5',namesGlo[4]) for w in Sline]
+                    Sline = [w.replace ('^ttg6',namesGlo[5]) for w in Sline]
+                    for n,i in enumerate(Sline):
+                        if i.find("http")>=0:
+                            Sline[n]=tinyurl.create_one(Sline[n])
+                    
+                    line=" ".join(Sline)
+                    nline=round(len(line)/280)
+                    Delta=float(len((line)))/280-nline
+                   
+                    if Delta > 0.01:
+                        nline+1
+                        wordC=len(Sline)
+                        sentS=int(round(wordC/2))
+                   
+                    if nline > 1 :
+                        for j in range (0,int(nline)):
+                            ind=j*sentS
+                            twline=" ".join(Sline[ind:(j+1)*sentS])
+                           
+                            if j > 0 :
+                               twline=" ".join(Sline[ind:(j+1)*(sentS+1)])
+                        twline=str(j+1)+"/"+str(int(nline))+". "+twline
+                       
+                        TwErrorLog.WriteInLog(self,'twitterDash.log',"".join(twline))
+                        #print("".join(twline))
+                        try:
+                            twapi.update_status("".join(twline))
+                            #time.sleep(15)
+                        except Exception as err:
+                            errMsg = str(err)
+                            TwErrorLog.WriteInLog(self,'twitterDash.log', str(errMsg)) 
+                            self.msgBox(str(errMsg),"Error Message","timed")  
+                            pass    
+                    else:
+                        try:
+                            twapi.update_status("".join(line))
+                            #print("".join(line))
+                            TwErrorLog.WriteInLog(self,'twitterDash.log',"".join(line))
+                        except Exception as err:
+                            errMsg = str(err)
+                            TwErrorLog.WriteInLog(self,'twitterDash.log', str(errMsg)) 
+                            self.msgBox(str(errMsg),"Error Message","timed")  
+                            pass
+                        
+               time.sleep(twtime*60)        
+                                           
+           except Exception as errMsg :
+               TwErrorLog.WriteInLog(self,'twitterDash.log',str(errMsg))
+               self.msgBox(str(errMsg),"Error Message","Information") 
+            
+        TwErrorLog.WriteInLog(self,'twitterDash.log',"Twitter Dash Bot Finished")
+        self.msgBox("Twitter Dash Bot Finished","Information Message","Information")
+        if ui.ckBoxBotStatByEmail.isChecked():
+            twapi.send_direct_message(
+                    myUser.screen_name,text=\
+                    'Twitter Publishing has been completed')
+    
+
+    
+    
     def CloseBotForm(self,Obj):
         self.FormTwitterBot.close()
         
     def showBotForm(self,Obj):
         global ui
+               
         self.FormTwitterBot = QtWidgets.QWidget()
         ui =twitterbot.Ui_FormTwitterBot()
         ui.setupUi(self.FormTwitterBot)
@@ -354,6 +503,9 @@ class TwitterActions:
         ui.pB_BotEditFile.clicked.connect(self.OpenBotWithExternal)
         ui.pB_BotDestroy.clicked.connect(self.destroyStatuses)
         ui.pB_BotClose.clicked.connect(self.CloseBotForm)
+        ui.pB_BotExecute.clicked.connect(self.executeBot)
+        ui.pB_MediaSelect.clicked.connect(self.MediaLocation)
+
         self.FormTwitterBot.show()
         
 
@@ -616,6 +768,9 @@ class Ui_Mw_TwitteDash(object):
         self.actionSecurity.setObjectName("actionSecurity")
         self.actionExit = QtWidgets.QAction(Mw_TwitteDash)
         self.actionExit.setObjectName("actionExit")
+        #Exit TwitterDAsh Click Option ###################               
+        self.actionExit.triggered.connect(lambda: QApplication.quit())
+        #####################################################################
         self.actionBot_File_Keys = QtWidgets.QAction(Mw_TwitteDash)
         self.actionBot_File_Keys.setObjectName("actionBot_File_Keys")
         self.actionAbout = QtWidgets.QAction(Mw_TwitteDash)
@@ -653,6 +808,8 @@ class Ui_Mw_TwitteDash(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(Mw_TwitteDash)
+        
+        
         QtCore.QMetaObject.connectSlotsByName(Mw_TwitteDash)
 
     def retranslateUi(self, Mw_TwitteDash):
@@ -671,25 +828,49 @@ class Ui_Mw_TwitteDash(object):
         self.menuFriends.setTitle(_translate("Mw_TwitteDash", "Friends"))
         self.menuHelp.setTitle(_translate("Mw_TwitteDash", "Help"))
         self.actionRead_Authentication_File.setText(_translate("Mw_TwitteDash", "Authenticate Credentials"))
+        
         self.actionTwitter_Bot_Settings.setText(_translate("Mw_TwitteDash", "Bot Settings"))
+        #self.actionTwitter_Bot_Settings.setEnabled(False)
+        
         self.actionTwitter_Auto_Follow_Request.setText(_translate("Mw_TwitteDash", "Auto Follow Settings"))
+        self.actionTwitter_Auto_Follow_Request.setEnabled(False)
+        
         self.actionTrending_Topics_Settings.setText(_translate("Mw_TwitteDash", "Trending Topics Settings"))
+        self.actionTrending_Topics_Settings.setEnabled(False)
+        
         self.actionSecurity.setText(_translate("Mw_TwitteDash", "Security"))
+        self.actionSecurity.setEnabled(False)
+        
         self.actionExit.setText(_translate("Mw_TwitteDash", "Exit"))
+        
         self.actionBot_File_Keys.setText(_translate("Mw_TwitteDash", "Bot File Keys"))
+        
         self.actionAbout.setText(_translate("Mw_TwitteDash", "About"))
+        
         self.actionCreate_Followers_File.setText(_translate("Mw_TwitteDash", "Create Followers File"))
+        self.actionCreate_Followers_File.setEnabled(False)
+        
+        
         self.actionCreate_Following_Files.setText(_translate("Mw_TwitteDash", "Create Following Files"))
+        self.actionCreate_Following_Files.setEnabled(False)
+        
         self.actionRead_Followers_File.setText(_translate("Mw_TwitteDash", "Read Followers File"))
+        self.actionRead_Followers_File.setEnabled(False)
+        
         self.actionRead_Following_File.setText(_translate("Mw_TwitteDash", "Read Following File"))
+        self.actionRead_Following_File.setEnabled(False)
+        
         self.actionStatistics.setText(_translate("Mw_TwitteDash", "Statistics"))
+        self.actionStatistics.setEnabled(False)
+        
         self.actionBot_File_Keys_2.setText(_translate("Mw_TwitteDash", "Bot File Keys"))
+        
         self.actionAbout_2.setText(_translate("Mw_TwitteDash", "About"))
 
 
 if __name__ == "__main__":
     import sys
-    
+    TwErrorLog.CreateErrLog("","twitterDash.log")
     twactions = TwitterActions()
     app = QtWidgets.QApplication(sys.argv)
     Mw_TwitteDash = QtWidgets.QMainWindow()

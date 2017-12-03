@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1056</width>
-    <height>699</height>
+    <width>1150</width>
+    <height>767</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,14 +19,14 @@
      <x>0</x>
      <y>0</y>
      <width>671</width>
-     <height>351</height>
+     <height>411</height>
     </rect>
    </property>
    <widget class="QLabel" name="Lbl_BotPubFreq">
     <property name="geometry">
      <rect>
       <x>52</x>
-      <y>79</y>
+      <y>140</y>
       <width>151</width>
       <height>31</height>
      </rect>
@@ -44,7 +44,7 @@
     <property name="geometry">
      <rect>
       <x>49</x>
-      <y>120</y>
+      <y>181</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -62,7 +62,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>160</y>
+      <y>221</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -80,7 +80,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>240</y>
+      <y>301</y>
       <width>201</width>
       <height>31</height>
      </rect>
@@ -98,7 +98,7 @@
     <property name="geometry">
      <rect>
       <x>220</x>
-      <y>80</y>
+      <y>141</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -113,7 +113,7 @@
     <property name="geometry">
      <rect>
       <x>220</x>
-      <y>160</y>
+      <y>221</y>
       <width>341</width>
       <height>31</height>
      </rect>
@@ -128,7 +128,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>310</y>
+      <y>371</y>
       <width>111</width>
       <height>28</height>
      </rect>
@@ -141,7 +141,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>240</y>
+      <y>301</y>
       <width>111</width>
       <height>28</height>
      </rect>
@@ -154,7 +154,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>310</y>
+      <y>371</y>
       <width>111</width>
       <height>28</height>
      </rect>
@@ -167,7 +167,7 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>310</y>
+      <y>371</y>
       <width>121</width>
       <height>28</height>
      </rect>
@@ -216,7 +216,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>200</y>
+      <y>261</y>
       <width>161</width>
       <height>31</height>
      </rect>
@@ -234,7 +234,7 @@
     <property name="geometry">
      <rect>
       <x>245</x>
-      <y>246</y>
+      <y>307</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -247,7 +247,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>240</y>
+      <y>301</y>
       <width>121</width>
       <height>28</height>
      </rect>
@@ -260,7 +260,7 @@
     <property name="geometry">
      <rect>
       <x>220</x>
-      <y>200</y>
+      <y>261</y>
       <width>321</width>
       <height>31</height>
      </rect>
@@ -270,7 +270,7 @@
     <property name="geometry">
      <rect>
       <x>220</x>
-      <y>120</y>
+      <y>181</y>
       <width>71</width>
       <height>31</height>
      </rect>
@@ -286,7 +286,7 @@
     <property name="geometry">
      <rect>
       <x>540</x>
-      <y>310</y>
+      <y>371</y>
       <width>121</width>
       <height>28</height>
      </rect>
@@ -295,11 +295,60 @@
      <string>Close</string>
     </property>
    </widget>
+   <widget class="QPlainTextEdit" name="pTE_BotMediaLocation">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>221</x>
+      <y>80</y>
+      <width>340</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QLabel" name="Lbl_BotFileName_2">
+    <property name="geometry">
+     <rect>
+      <x>53</x>
+      <y>79</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Media File Location</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pB_MediaSelect">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>80</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>...</string>
+    </property>
+   </widget>
    <widget class="QWidget" name="widget_StatusBar" native="true">
     <property name="geometry">
      <rect>
-      <x>89</x>
-      <y>275</y>
+      <x>72</x>
+      <y>333</y>
       <width>541</width>
       <height>30</height>
      </rect>
@@ -308,7 +357,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>0</y>
+       <y>61</y>
        <width>131</width>
        <height>20</height>
       </rect>
@@ -320,17 +369,14 @@
     <widget class="QProgressBar" name="pBarDestroyingStatuses">
      <property name="geometry">
       <rect>
-       <x>180</x>
+       <x>20</x>
        <y>0</y>
-       <width>341</width>
+       <width>511</width>
        <height>23</height>
       </rect>
      </property>
      <property name="value">
       <number>0</number>
-     </property>
-     <property name="format">
-      <string/>
      </property>
     </widget>
    </widget>
@@ -339,7 +385,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>380</y>
+     <y>440</y>
      <width>111</width>
      <height>16</height>
     </rect>
@@ -352,7 +398,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>400</y>
+     <y>460</y>
      <width>1001</width>
      <height>281</height>
     </rect>
